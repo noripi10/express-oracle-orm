@@ -46,7 +46,9 @@
     "express": "^4.17.2",
     "node-fetch": "2",
     "oracledb": "^5.3.0",
+    "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
+    "typeorm": "^0.2.41",
     "yarn": "^1.22.17"
   }
 }

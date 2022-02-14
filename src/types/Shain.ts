@@ -1,9 +1,3 @@
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-};
-
 export type Shain = {
   SHAIN_CODE: string;
   SHAIN_KANA: string;

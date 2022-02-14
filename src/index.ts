@@ -2,48 +2,9 @@ import express from 'express';
 import request from 'request';
 import nodeFetch from 'node-fetch';
 import dotenv from 'dotenv';
-import oracledb from 'oracledb';
-// import bodyParser from "body-parser";
-
-import { users } from './libs/data';
-import { Shain } from './types';
-
+import { connectionDbAsyncORM } from './db';
+import { M_SHAIN } from './db/entity/Shain';
 dotenv.config();
-// console.info(process.env);
-
-// OracleDB接続設定
-// https://www.oracle.com/database/technologies/appdev/quickstartnodeonprem.html
-// ※事前にOracleClientをインスール
-/*
- * Alternatively, if you already have a database but it is on a remote computer,
- * then install the Oracle Instant Client "Basic" and "SQL*Plus" packages from here.
- * Remember to install the VS Redistributable and add the directory to your PATH environment variable, as instructed.
- * You will need to know the connect string for the database, and substitute it in the instructions below.
- */
-(async function () {
-  try {
-    const connection = await oracledb.getConnection({
-      user: process.env.ORACLE_USER,
-      password: process.env.ORACLE_PASSWORD,
-      connectionString: process.env.ORACLE_CONNECTION_STRING,
-    });
-    console.info('Connected to Oracle DB', connection.oracleServerVersionString);
-
-    const data = await connection.execute<Shain[]>(
-      'select * from m_shain where shain_code = :SHAIN_CODE',
-      { SHAIN_CODE: process.env.TEST_USER },
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
-    if (!!data.rows?.length) {
-      console.info(data.rows[0]);
-    }
-
-    await connection.close();
-    console.info('Closed Oracle DB');
-  } catch (error) {
-    console.warn(error);
-  }
-})();
 
 // Express初期設定
 const app: express.Express = express();
@@ -63,9 +24,17 @@ if (ENV === 'development') {
 }
 
 //一覧取得1
-app.get('/users', (req: express.Request, res: express.Response) => {
+app.get('/shain', async (req: express.Request, res: express.Response) => {
   try {
-    res.status(200).send(JSON.stringify(users));
+    console.info(req.query);
+    const _connection = await connectionDbAsyncORM();
+
+    const shain = await _connection?.query(`select * from m_shain where shain_code = '${process.env.TEST_USER}'`);
+    // const shain = _connection?.getRepository(M_SHAIN).findOne({ SHAIN_CODE: '11925' });
+    console.info({ shain });
+
+    res.status(200).send(JSON.stringify(shain));
+    _connection?.close();
   } catch (error) {
     if (error instanceof Error) {
       res.status(403).send(error.message);
@@ -95,7 +64,7 @@ app.get('/book', async (req: express.Request, res: express.Response) => {
 });
 
 //一覧取得3
-app.get('/sample', async (req: express.Request, res: express.Response) => {
+app.get('/book-detail', async (req: express.Request, res: express.Response) => {
   try {
     const result = await nodeFetch('https://www.googleapis.com/books/v1/volumes?q=isbn:4309025447');
     const json = await result.json();
