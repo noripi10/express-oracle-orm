@@ -3,7 +3,8 @@ import request from 'request';
 import nodeFetch from 'node-fetch';
 import dotenv from 'dotenv';
 import { connectionDbAsyncORM } from './db';
-import { M_SHAIN } from './db/entity/Shain';
+import { toCamelCase } from './libs/common';
+
 dotenv.config();
 
 // Express初期設定
@@ -27,13 +28,21 @@ if (ENV === 'development') {
 app.get('/shain', async (req: express.Request, res: express.Response) => {
   try {
     console.info(req.query);
+    const shainId = req.query.id ?? '';
     const _connection = await connectionDbAsyncORM();
 
-    const shain = await _connection?.query(`select * from m_shain where shain_code = '${process.env.TEST_USER}'`);
-    // const shain = _connection?.getRepository(M_SHAIN).findOne({ SHAIN_CODE: '11925' });
-    console.info({ shain });
+    const shains = await _connection?.query(`select * from m_shain where shain_code = '${shainId}'`);
+    // const shain = _connection?.getRepository(M_SHAIN).findOne({ SHAIN_CODE: '' });
 
-    res.status(200).send(JSON.stringify(shain));
+    if (!shains) {
+      res.status(404).send('no data');
+    }
+    const resData = Object.keys(shains[0]).reduce((obj, key) => {
+      // camelCase変換
+      return { ...obj, [toCamelCase(key)]: shains[0][key] };
+    }, {});
+
+    res.status(200).send(JSON.stringify(resData));
     _connection?.close();
   } catch (error) {
     if (error instanceof Error) {
@@ -81,5 +90,8 @@ app.get('/book-detail', async (req: express.Request, res: express.Response) => {
 app.listen(3001, () => {
   console.info('start on port 3001.');
 });
+
+// const server = http.createServer(app);
+// server.listen(process.env.PORT || 3001, () => console.info(`start server ${process.env.PORT || 3001}`));
 
 export default app;
