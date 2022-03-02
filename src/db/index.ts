@@ -16,6 +16,7 @@ export const connectionDbAsyncORM = async (): Promise<Connection | undefined> =>
     return connection;
   } catch (error) {
     console.warn(error);
+    return undefined;
   }
 };
 
@@ -46,5 +47,6 @@ export const connectionDbAync = async (): Promise<OracleDb.Connection | undefine
     return connection;
   } catch (error) {
     console.warn(error);
+    return undefined;
   }
 };

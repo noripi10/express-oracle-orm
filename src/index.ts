@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'request';
 import nodeFetch from 'node-fetch';
 import dotenv from 'dotenv';
+
 import { connectionDbAsyncORM } from './db';
 import { toCamelCase } from './libs/common';
 
@@ -26,29 +27,34 @@ if (ENV === 'development') {
 
 //一覧取得1
 app.get('/shain', async (req: express.Request, res: express.Response) => {
+  let _connection;
+  if (!_connection) {
+    _connection = await connectionDbAsyncORM();
+  }
   try {
     console.info(req.query);
     const shainId = req.query.id ?? '';
-    const _connection = await connectionDbAsyncORM();
-
     const shains = await _connection?.query(`select * from m_shain where shain_code = '${shainId}'`);
     // const shain = _connection?.getRepository(M_SHAIN).findOne({ SHAIN_CODE: '' });
-
     if (!shains) {
       res.status(404).send('no data');
     }
+
+    // camelCase変換
     const resData = Object.keys(shains[0]).reduce((obj, key) => {
-      // camelCase変換
       return { ...obj, [toCamelCase(key)]: shains[0][key] };
     }, {});
 
     res.status(200).send(JSON.stringify(resData));
-    _connection?.close();
   } catch (error) {
     if (error instanceof Error) {
       res.status(403).send(error.message);
     }
-    res.status(403).send();
+    res.status(403).send('error');
+  } finally {
+    if (_connection) {
+      _connection?.close();
+    }
   }
 });
 
