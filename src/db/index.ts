@@ -1,7 +1,7 @@
 import OracleDb from 'oracledb';
 import { Connection, createConnection } from 'typeorm';
 
-import oracleConnectionOptions from './oracleConnectionOptions';
+import ormSettings from './ormSettings';
 import { Shain } from 'src/types/Shain';
 
 // OracleDB接続設定
@@ -10,7 +10,7 @@ import { Shain } from 'src/types/Shain';
 
 export const connectionDbAsyncORM = async (): Promise<Connection | undefined> => {
   try {
-    const connection = await createConnection(oracleConnectionOptions);
+    const connection = await createConnection(ormSettings);
     console.info('Connected to Oracle DB', connection.isConnected);
 
     return connection;

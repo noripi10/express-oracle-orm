@@ -11,13 +11,13 @@ const oracleConnectionOptions: ConnectionOptions = {
   connectString: process.env.ORACLE_CONNECTION_STRING,
   synchronize: true,
   logging: false,
-  entities: ['./entity/**/*.ts'],
-  migrations: ['./migration/**/*.ts'],
-  subscribers: ['./subscriber/**/*.ts'],
+  entities: ['entity/**/*.ts'],
+  migrations: ['migration/**/*.ts'],
+  subscribers: ['subscriber/**/*.ts'],
   cli: {
-    entitiesDir: './entity',
-    migrationsDir: './migration',
-    subscribersDir: './subscriber',
+    entitiesDir: 'entity',
+    migrationsDir: 'migration',
+    subscribersDir: 'subscriber',
   },
 };
 
